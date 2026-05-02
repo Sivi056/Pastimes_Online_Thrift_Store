@@ -1,5 +1,0 @@
-Sivikelwe Nxumalo,sivsav@gmail.com,BEATmen34567-,Seller
-Kylah Irvin,kyrvin@outlook.com,Fashionista1!,Seller
-Mpilo Mzimela,mpilomzee23@pastimes.co.za,MzeeWord123!,Buyer
-Zizi Mvumbi,zmvumbi@gmail.com,Clothingpastimes99#,Buyer
-Admin User,admin@pastimes.com,AdminSecret01*,Admin

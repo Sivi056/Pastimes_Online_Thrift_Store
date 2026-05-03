@@ -11,17 +11,17 @@
 <body>
 
     <nav>
-    <div class="logo">PASTIMES</div>
-    <div>
-        <a href="index.php">Home</a>
-        <a href="discovery.php">Discovery</a>
-        <?php if(isset($_SESSION['username'])): ?>
+        <div class="logo">PASTIMES</div>
+        <div>
+            <a href="index.php">Home</a>
+            <a href="discovery.php">Discovery</a>
+            <?php if(isset($_SESSION['username'])): ?>
             <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
-        <?php else: ?>
+            <?php else: ?>
             <a href="login.php">Login</a>
-        <?php endif; ?>
-    </div>
-</nav>
+            <?php endif; ?>
+        </div>
+    </nav>
 
     <div class="container" style="text-align: center;">
         <?php if(!isset($_SESSION['username'])): ?>
@@ -29,20 +29,14 @@
         <p>Your destination for pre-loved branded clothing.</p>
         <hr style="border: 1px solid var(--pastimes-gold); width: 50%;">
 
-        <h2>Create Your Account</h2>
-        <form action="logic.php" method="POST">
-            <input type="text" name="username" placeholder="Full Name" required>
-            <input type="email" name="email" placeholder="Email Address" required>
-            <input type="password" name="password" placeholder="Password (8+ characters)" minlength="8" required>
+        <h2>Ready to get started?</h2>
+        <p>Log in to your account to start buying or selling.</p>
 
-            <div style="margin: 15px 0; text-align: left;">
-                <label><strong>I want to:</strong></label><br>
-                <input type="radio" name="role" value="Buyer" checked style="width: auto;"> Buy Clothing
-                <input type="radio" name="role" value="Seller" style="width: auto;"> Sell Clothing
-            </div>
+        <a href="login.php" class="btn-gold"
+            style="display: inline-block; text-decoration: none; margin-top: 20px;">Login</a>
 
-            <button type="submit" name="register" class="btn-gold">Join the Community</button>
-        </form>
+        <p style="margin-top: 15px; font-size: 0.9em;">Don't have an account? <a href="register.php"
+                style="color: var(--pastimes-green);">Register here</a></p>
         <?php else: ?>
         <h1>Hello, <?php echo $_SESSION['username']; ?>!</h1>
         <p>Role: <strong><?php echo $_SESSION['role']; ?></strong></p>

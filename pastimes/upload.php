@@ -1,4 +1,5 @@
 <?php session_start(); 
+// Only allow sellers to access this page, buyers shouldnt be able to upload items for sale bc well they arent sellers so yeah
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller') {
     header("Location: index.php");
 }
@@ -10,12 +11,14 @@ if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller') {
     <title>Upload Item | Pastimes</title>
 </head>
 <body>
+    <!-- we like a button to go back to where we were, much better than having to mash the back arrow on the browser -->
 <nav><a href="index.php">Back Home</a></nav>
 
 <div class="container">
     <h2>Upload Branded Clothing</h2>
     <form action="discovery.php" method="POST">
         <label>Brand</label>
+        <!-- would be wild seeing Gucci for sale lol, i mean it happens but i doubt itll be the real thing -->
         <input type="text" name="brand" placeholder="e.g. Nike, Adidas, Gucci" required>
         
         <label>Description</label>

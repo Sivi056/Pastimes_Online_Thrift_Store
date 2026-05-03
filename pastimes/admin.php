@@ -5,16 +5,19 @@ session_start();
 // Verify User
 if (isset($_GET['verify'])) {
     $id = intval($_GET['verify']);
-    // Note: Ensure this column name matches your DB (isVerified)
+    // Note: gotta make sure this column name matches the DB (isVerified) else it gets upset
     mysqli_query($conn, "UPDATE user SET isVerified = 1 WHERE userId = $id");
+    // Redirect back to admin page after verification
     header("Location: admin.php");
     exit();
 }
 
 // Delete User
 if (isset($_GET['delete'])) {
+    // check we have something to delete at all
     $id = intval($_GET['delete']);
     mysqli_query($conn, "DELETE FROM user WHERE userId = $id");
+    // Redirect back to admin page after deletion
     header("Location: admin.php");
     exit();
 }
@@ -24,8 +27,9 @@ if (isset($_POST['update_user'])) {
     $id = $_POST['userId'];
     $newName = $_POST['userName'];
     $newEmail = $_POST['userEmail'];
-    
+    // Update the user's name and email in the database
     mysqli_query($conn, "UPDATE user SET userName = '$newName', userEmail = '$newEmail' WHERE userId = $id");
+    // Redirect back to admin page after update
     header("Location: admin.php");
     exit();
 }
@@ -42,7 +46,7 @@ $users = mysqli_query($conn, "SELECT * FROM user WHERE role != 'Admin'");
     <link rel="stylesheet" href="style.css">
     <title>Pastimes | Admin Control</title>
     <style>
-    /* This prevents the "Messy Squeeze" you saw earlier */
+    /* Ensure the table is responsive and looks good on all screen sizes */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -87,6 +91,7 @@ $users = mysqli_query($conn, "SELECT * FROM user WHERE role != 'Admin'");
         <table>
             <thead>
                 <tr style="background: #006400; color: #D4AF37;">
+                    <!-- custom widths bc it doesnt do it nicely automatically, not great for standards but it works -->
                     <th style="width: 10%;">ID</th>
                     <th style="width: 25%;">Name</th>
                     <th style="width: 30%;">Email</th>
@@ -95,6 +100,7 @@ $users = mysqli_query($conn, "SELECT * FROM user WHERE role != 'Admin'");
                 </tr>
             </thead>
             <tbody>
+                <!-- Loop through users and display them in the table -->
                 <?php while($row = mysqli_fetch_assoc($users)): ?>
                 <tr style="text-align: center;">
                     <td><?php echo $row['userId']; ?></td>
@@ -126,6 +132,7 @@ $users = mysqli_query($conn, "SELECT * FROM user WHERE role != 'Admin'");
                             <button type="submit" name="update_user"
                                 style="background:none; border:none; color:blue; cursor:pointer; text-decoration:underline; font-size:14px;">Update</button>
                             <br>
+                            <!-- Only show the "Verify" option if the user is not already verified -->
                             <?php if(isset($row['isVerified']) && !$row['isVerified']): ?>
                             <a href="admin.php?verify=<?php echo $row['userId']; ?>"
                                 style="color: green; font-weight: bold; font-size:14px;">Verify</a> |

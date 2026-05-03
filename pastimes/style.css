@@ -8,6 +8,7 @@
 }
 
 body {
+    /* I mean comic sans would be fun too */
     font-family: 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
     background-color: var(--light-grey);

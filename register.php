@@ -1,24 +1,24 @@
 <?php
 include 'DBConn.php';
+session_start();
 $msg = "";
 
 if (isset($_POST['register'])) {
-    $user = $_POST['username'];
-    $email = $_POST['email'];
+    $user = mysqli_real_escape_string($conn, $_POST['username']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
     $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = $_POST['role'];
 
-    $sql = "INSERT INTO user (username, userEmail, password, role, isVerified) 
-            VALUES ('$user', '$email', '$pass', '$role', 0)"; // 0 means Pending
+    $sql = "INSERT INTO user (userName, userEmail, password, role, isVerified) 
+            VALUES ('$user', '$email', '$pass', '$role', 0)";
 
     if (mysqli_query($conn, $sql)) {
-        $msg = "Registration successful! Please wait for an Admin to verify your account.";
+        $msg = "Registration successful! Wait for Admin verification.";
     } else {
         $msg = "Error: " . mysqli_error($conn);
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 
@@ -29,7 +29,7 @@ if (isset($_POST['register'])) {
 <body>
     <div class="container">
         <h2>Register for Pastimes</h2>
-        <p style="color:green;"><?php echo $msg; ?></p>
+        <?php if($msg) echo "<p style='color:red;'>$msg</p>"; ?>
         <form method="POST">
             <input type="text" name="username" placeholder="Full Name" required>
             <input type="email" name="email" placeholder="Email" required>

@@ -2,148 +2,55 @@
 include 'DBConn.php';
 session_start();
 
-// Verify User
 if (isset($_GET['verify'])) {
     $id = intval($_GET['verify']);
-    // Note: Ensure this column name matches your DB (isVerified)
     mysqli_query($conn, "UPDATE user SET isVerified = 1 WHERE userId = $id");
-    header("Location: admin.php");
-    exit();
+    header("Location: admin.php"); exit();
 }
 
-// Delete User
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     mysqli_query($conn, "DELETE FROM user WHERE userId = $id");
-    header("Location: admin.php");
-    exit();
+    header("Location: admin.php"); exit();
 }
 
-// Update User (Requirement 4)
-if (isset($_POST['update_user'])) {
-    $id = $_POST['userId'];
-    $newName = $_POST['userName'];
-    $newEmail = $_POST['userEmail'];
-    
-    mysqli_query($conn, "UPDATE user SET userName = '$newName', userEmail = '$newEmail' WHERE userId = $id");
-    header("Location: admin.php");
-    exit();
-}
-
-// Fetch all customers (excluding any admins if they were in this table)
-$users = mysqli_query($conn, "SELECT * FROM user WHERE role != 'Admin'");
+$users = mysqli_query($conn, "SELECT * FROM user");
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
-    <title>Pastimes | Admin Control</title>
-    <style>
-    /* This prevents the "Messy Squeeze" you saw earlier */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        /* Forces columns to respect widths */
-    }
-
-    th,
-    td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        word-wrap: break-word;
-    }
-
-    /* Make the inputs fit inside the cells properly */
-    td input {
-        width: 95% !important;
-        padding: 5px !important;
-        margin: 0 !important;
-        box-sizing: border-box;
-    }
-
-    .status-pending {
-        color: orange;
-        font-weight: bold;
-    }
-
-    .status-verified {
-        color: green;
-        font-weight: bold;
-    }
-    </style>
 </head>
 
 <body>
-
-    <div class="container" style="max-width: 1000px;">
-        <h1>Admin Dashboard</h1>
-        <p>Manage Customer Registrations & Verification</p>
-        <hr>
-
+    <div class="container" style="max-width:900px">
+        <h1>Admin Panel</h1>
         <table>
-            <thead>
-                <tr style="background: #006400; color: #D4AF37;">
-                    <th style="width: 10%;">ID</th>
-                    <th style="width: 25%;">Name</th>
-                    <th style="width: 30%;">Email</th>
-                    <th style="width: 15%;">Status</th>
-                    <th style="width: 20%;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while($row = mysqli_fetch_assoc($users)): ?>
-                <tr style="text-align: center;">
-                    <td><?php echo $row['userId']; ?></td>
-
-                    <form method="POST" action="admin.php">
-                        <input type="hidden" name="userId" value="<?php echo $row['userId']; ?>">
-
-                        <td>
-                            <input type="text" name="userName"
-                                value="<?php echo htmlspecialchars($row['userName']); ?>">
-                        </td>
-
-                        <td>
-                            <input type="email" name="userEmail"
-                                value="<?php echo htmlspecialchars($row['userEmail']); ?>">
-                        </td>
-
-                        <td>
-                            <?php 
-                            // Safety check for the array key to prevent PHP warnings
-                            if(isset($row['isVerified']) && $row['isVerified'] == 1): ?>
-                            <span class="status-verified">Verified</span>
-                            <?php else: ?>
-                            <span class="status-pending">Pending</span>
-                            <?php endif; ?>
-                        </td>
-
-                        <td>
-                            <button type="submit" name="update_user"
-                                style="background:none; border:none; color:blue; cursor:pointer; text-decoration:underline; font-size:14px;">Update</button>
-                            <br>
-                            <?php if(isset($row['isVerified']) && !$row['isVerified']): ?>
-                            <a href="admin.php?verify=<?php echo $row['userId']; ?>"
-                                style="color: green; font-weight: bold; font-size:14px;">Verify</a> |
-                            <?php endif; ?>
-
-                            <a href="admin.php?delete=<?php echo $row['userId']; ?>" style="color:red; font-size:14px;"
-                                onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
-                        </td>
-                    </form>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            <?php while($row = mysqli_fetch_assoc($users)): ?>
+            <tr>
+                <td><?php echo $row['userId']; ?></td>
+                <td><?php echo $row['userName']; ?></td>
+                <td><?php echo $row['userEmail']; ?></td>
+                <td><?php echo $row['isVerified'] ? "Verified" : "Pending"; ?></td>
+                <td>
+                    <?php if(!$row['isVerified']): ?>
+                    <a href="admin.php?verify=<?php echo $row['userId']; ?>">Verify</a> |
+                    <?php endif; ?>
+                    <a href="admin.php?delete=<?php echo $row['userId']; ?>" style="color:red">Delete</a>
+                </td>
+            </tr>
+            <?php endwhile; ?>
         </table>
-
-        <br>
-        <a href="login.php" class="btn-gold">Back to Login</a>
+        <a href="index.php" class="btn-gold">Back Home</a>
     </div>
-
 </body>
 
 </html>

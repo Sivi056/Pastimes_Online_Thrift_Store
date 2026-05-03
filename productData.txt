@@ -1,0 +1,10 @@
+1,1,Nike,850.00,5,Classic Air Force 1s,UK 8,Leather,White,Available
+2,1,Adidas,450.00,4,Vintage tracksuit jacket,M,Polyester,Blue,Available
+3,2,Zara,300.00,5,Formal slim fit trousers,32,Cotton,Black,Available
+4,2,Levi's,600.00,3,Distressed 501 jeans,34,Denim,Blue,Available
+5,1,Gucci,1500.00,5,Authentic leather belt,S,Leather,Brown,Available
+6,6,Puma,700.00,4,Suede Classic Sneakers,UK 7,Suede,Black,Available
+7,7,H&M,200.00,5,Basic Oversized Hoodie,L,Cotton,Grey,Available
+8,6,Prada,2500.00,5,Luxury Nylon Bag,OS,Nylon,Black,Available
+9,1,Converse,400.00,3,Chuck Taylor High Tops,UK 9,Canvas,Red,Available
+10,2,Vans,550.00,4,Old Skool Skate Shoes,UK 6,Canvas,Checkered,Available

@@ -7,6 +7,7 @@
 <?php
 // This file handles the login logic for users and also displays the login form.
 include 'DBConn.php';
+// https://www.w3schools.com/php/php_sessions.asp
 // Start the session to manage user login state
 session_start();
 $error = "";
@@ -37,6 +38,7 @@ if (isset($_POST['login']))
                         } 
                         else // If verified, set session variables and redirect to homepage
                         {
+                            // https://www.w3schools.com/php/php_sessions.asp
                             $_SESSION['username'] = $row['userName'];
                             $_SESSION['role'] = $row['role'];
                             $_SESSION['userId'] = $row['userId'];

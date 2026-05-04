@@ -6,6 +6,7 @@
 
 <?php
 include 'DBConn.php';
+// https://www.w3schools.com/php/php_sessions.asp
 session_start();
 $msg = "";
 
@@ -15,6 +16,8 @@ if (isset($_POST['register']))
         // https://www.w3schools.com/php/func_mysqli_real_escape_string.asp
         $user = mysqli_real_escape_string($conn, $_POST['username']);
         $email = mysqli_real_escape_string($conn, $_POST['email']);
+
+        // https://www.php.net/manual/en/function.password-hash.php
         // Hash the password before storing it in the database for security
         // last year we got in trouble for using hashes lol
         $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);

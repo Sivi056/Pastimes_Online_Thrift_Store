@@ -5,18 +5,18 @@
  -->
 
 <?php
-// Include your connection file
+// Include the connection file
 include 'DBConn.php';
 
 echo "<h2>Pastimes Store: Database Initialization System</h2>";
 
-//Define the name of your SQL export from Requirement 8
+//Define the name of the SQL export (Requirement 8)
 $sqlFile = 'myClothingStore.sql';
 
 //https://www.w3schools.com/php/func_filesystem_file_exists.asp
 if (file_exists($sqlFile)) 
     {
-        // Read the contents of your exported SQL file
+        // Read the contents of the exported SQL file
         $sqlQueries = file_get_contents($sqlFile);
 
         //https://www.w3schools.com/php/func_mysqli_multi_query.asp

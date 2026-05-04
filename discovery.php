@@ -6,8 +6,10 @@
 
 <?php
 include 'DBConn.php';
+// https://www.w3schools.com/php/php_sessions.asp
 session_start();
 
+//https://www.w3schools.com/php/php_sessions.asp
 $theme = $_SESSION['theme'] ?? 'Light';
 ?>
 <!DOCTYPE html>

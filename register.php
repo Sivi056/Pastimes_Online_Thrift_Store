@@ -9,8 +9,10 @@ include 'DBConn.php';
 session_start();
 $msg = "";
 
+// https://www.w3schools.com/php/func_var_isset.asp
 if (isset($_POST['register'])) 
     { /* from https://youtu.be/NfOI8cndhu8?si=ZGU6evW3kBTkXBFn around 16:30 */
+        // https://www.w3schools.com/php/func_mysqli_real_escape_string.asp
         $user = mysqli_real_escape_string($conn, $_POST['username']);
         $email = mysqli_real_escape_string($conn, $_POST['email']);
         // Hash the password before storing it in the database for security

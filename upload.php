@@ -5,6 +5,8 @@
  -->
 
 <?php session_start(); 
+
+//https://www.w3schools.com/php/func_var_isset.asp
 // Only allow sellers to access this page, buyers shouldnt be able to upload items for sale bc well they arent sellers so yeah
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller') 
     {

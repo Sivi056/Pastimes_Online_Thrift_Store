@@ -13,11 +13,13 @@ echo "<h2>Pastimes Store: Database Initialization System</h2>";
 //Define the name of your SQL export from Requirement 8
 $sqlFile = 'myClothingStore.sql';
 
+//https://www.w3schools.com/php/func_filesystem_file_exists.asp
 if (file_exists($sqlFile)) 
     {
         // Read the contents of your exported SQL file
         $sqlQueries = file_get_contents($sqlFile);
 
+        //https://www.w3schools.com/php/func_mysqli_multi_query.asp
         //Disable Foreign Key checks so we can drop/rebuild tables without errors
         mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
 
@@ -33,6 +35,7 @@ if (file_exists($sqlFile))
                             mysqli_free_result($result);
                         }
                 } 
+                //https://www.w3schools.com/php/func_mysqli_more_results.asp
                 while (mysqli_more_results($conn) && mysqli_next_result($conn));
                 echo "<p style='color:green; font-weight:bold;'>SUCCESS: Database structure and data have been fully restored from $sqlFile.</p>";
             } 

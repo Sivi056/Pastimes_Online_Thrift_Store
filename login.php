@@ -13,9 +13,11 @@ $error = "";
 
 //removed stickyuser
 
+//https://www.w3schools.com/php/func_var_isset.asp
 // pretty much everything under this is leanred from https://youtu.be/UeTHl9dmLb8?si=yvq_bvW2s6-iwL0c starting around 0:20
 if (isset($_POST['login'])) 
     {
+        //https://www.w3schools.com/php/func_mysqli_real_escape_string.asp
         // Capture form data and use it for login logic
         $email = mysqli_real_escape_string($conn, $_POST['email']);
         $password = $_POST['password'];
@@ -23,6 +25,7 @@ if (isset($_POST['login']))
         $sql = "SELECT * FROM user WHERE userEmail = '$email'";
         $result = mysqli_query($conn, $sql);
 
+        //https://www.w3schools.com/php/func_mysqli_fetch_assoc.asp
         if ($row = mysqli_fetch_assoc($result))  // "Associative read approach" per requirements
             {
                 if (password_verify($password, $row['password'])) 

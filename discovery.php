@@ -23,6 +23,7 @@ $theme = $_SESSION['theme'] ?? 'Light';
         <div>
             <a href="index.php">Home</a>
             <a href="discovery.php">Discovery</a>
+            <!-- https://www.w3schools.com/php/func_var_isset.asp -->
             <?php if(isset($_SESSION['username'])): ?>
                 <a href="logout.php">Logout</a>
             <?php else: ?>

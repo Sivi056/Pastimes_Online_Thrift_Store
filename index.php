@@ -21,6 +21,7 @@
         <div>
             <a href="index.php">Home</a>
             <a href="discovery.php">Discovery</a>
+            <!-- https://www.w3schools.com/php/func_var_isset.asp -->
             <?php if(isset($_SESSION['username'])): ?>
             <!-- Show logout link with username if logged in -->
             <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
@@ -31,6 +32,7 @@
     </nav>
 
     <div class="container" style="text-align: center;">
+        <!-- https://www.w3schools.com/php/func_var_isset.asp -->
         <?php if(!isset($_SESSION['username'])): ?>
         <h1>Welcome to Pastimes</h1>
         <p>Your destination for pre-loved branded clothing.</p>

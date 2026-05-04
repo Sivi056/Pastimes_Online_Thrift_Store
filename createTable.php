@@ -30,6 +30,7 @@ if (mysqli_query($conn, $createSQL))
     } 
     else 
     {
+        //https://www.w3schools.com/php/func_misc_die.asp
         //"die" is still funny lol
         die("Error creating table: " . mysqli_error($conn));
     }
@@ -37,6 +38,7 @@ if (mysqli_query($conn, $createSQL))
 // 3. Loading data from userData.txt
 $filename = "userData.txt";
 
+//https://www.w3schools.com/php/func_filesystem_file_exists.asp
 if (file_exists($filename)) 
     {
         // Read file into an array and skip empty lines automatically
@@ -49,6 +51,8 @@ if (file_exists($filename))
             // Skip if the line is empty after trimming the spaces n such (basically no empty stuff gets through)
             if (empty($line)) continue;
 
+            //https://www.w3schools.com/php/func_string_explode.asp
+            //lol explode, data go brrrrr
             $data = explode(",", $line);
             
             // Safety: Only proceed if we have at least 4 columns (Name, Email, Pass, Role)
@@ -56,6 +60,8 @@ if (file_exists($filename))
                 {
                     $name = mysqli_real_escape_string($conn, trim($data[0]));
                     $email = mysqli_real_escape_string($conn, trim($data[1]));
+
+                    
                     // Hash the password for security
                     $pass = password_hash(trim($data[2]), PASSWORD_DEFAULT);
                     $role = mysqli_real_escape_string($conn, trim($data[3]));

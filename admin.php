@@ -8,7 +8,7 @@
 include 'DBConn.php';
 session_start();
 
-
+//https://www.w3schools.com/php/func_var_isset.asp
 // Verify User
 if (isset($_GET['verify'])) 
     {
@@ -56,6 +56,7 @@ $users = mysqli_query($conn, "SELECT * FROM user");
                 <th>Actions</th>
             </tr>
                 <!-- Loop through users and display them in the table -->
+                 <!-- https://www.w3schools.com/php/func_mysqli_fetch_assoc.asp -->
                 <?php while($row = mysqli_fetch_assoc($users)): ?>
             <tr>
                 <td><?php echo $row['userId']; ?></td>

@@ -1,3 +1,9 @@
+<!-- watched during development:
+ https://youtube.com/playlist?list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&si=yJE-go8ZPSrvP-pI
+ https://youtube.com/playlist?list=PLOR5hj0X3WPdOWwU7eCCfFcgIkS1WrDYl&si=_uDfh-nC1HIBcn4u
+ https://youtube.com/playlist?list=PL5kIDoSdjG7PY_kPyULbbLk4mpvStqdPR&si=Vxt44Xpmhx7jnkji
+ -->
+
 <?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +15,7 @@
 </head>
 
 <body>
-<!-- Navbar from https://www.youtube.com/watch?v=0QY2VI1JbN8&list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&index=3 around 0:50 in -->
+<!-- Navbar specifically from https://www.youtube.com/watch?v=0QY2VI1JbN8&list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&index=3 around 0:50 in -->
     <nav>
         <div class="logo">PASTIMES</div>
         <div>

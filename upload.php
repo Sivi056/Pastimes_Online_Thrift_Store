@@ -1,3 +1,9 @@
+<!-- watched during development:
+ https://youtube.com/playlist?list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&si=yJE-go8ZPSrvP-pI
+ https://youtube.com/playlist?list=PLOR5hj0X3WPdOWwU7eCCfFcgIkS1WrDYl&si=_uDfh-nC1HIBcn4u
+ https://youtube.com/playlist?list=PL5kIDoSdjG7PY_kPyULbbLk4mpvStqdPR&si=Vxt44Xpmhx7jnkji
+ -->
+
 <?php session_start(); 
 // Only allow sellers to access this page, buyers shouldnt be able to upload items for sale bc well they arent sellers so yeah
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller') 
@@ -5,6 +11,7 @@ if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller')
         header("Location: index.php");
     }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>

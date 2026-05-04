@@ -1,3 +1,9 @@
+<!-- watched during development but referncing each video in each playlist in the correct spot is kinda hard given that its not always clear which pne it was
+ https://youtube.com/playlist?list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&si=yJE-go8ZPSrvP-pI
+ https://youtube.com/playlist?list=PLOR5hj0X3WPdOWwU7eCCfFcgIkS1WrDYl&si=_uDfh-nC1HIBcn4u
+ https://youtube.com/playlist?list=PL5kIDoSdjG7PY_kPyULbbLk4mpvStqdPR&si=Vxt44Xpmhx7jnkji
+ -->
+
 <?php
 include 'DBConn.php';
 

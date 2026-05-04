@@ -2,6 +2,7 @@
 include 'DBConn.php';
 session_start();
 
+
 // Verify User
 if (isset($_GET['verify'])) 
     {
@@ -13,6 +14,7 @@ if (isset($_GET['verify']))
         exit();
     }
 
+// used https://www.w3schools.com/php/php_mysql_delete.asp for help
 // Delete User
 if (isset($_GET['delete'])) 
     {

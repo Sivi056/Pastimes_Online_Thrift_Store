@@ -9,7 +9,7 @@
 </head>
 
 <body>
-
+<!-- Navbar from https://www.youtube.com/watch?v=0QY2VI1JbN8&list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&index=3 around 0:50 in -->
     <nav>
         <div class="logo">PASTIMES</div>
         <div>

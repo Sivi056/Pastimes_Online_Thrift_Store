@@ -30,6 +30,7 @@ $theme = $_SESSION['theme'] ?? 'Light';
         <p style="color: var(--pastimes-gold); font-weight: bold;">Next Drop in: <span id="timer">05:42:10</span></p>
         <hr>
 
+        <!-- from https://www.youtube.com/watch?v=0QY2VI1JbN8&list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&index=3 about 14:50 in -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
             <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
                 <img src="image_3.png" alt="Nike Sneakers" style="width: 100%; border-radius: 5px;">

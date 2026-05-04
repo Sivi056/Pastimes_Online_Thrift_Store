@@ -7,6 +7,7 @@ $error = "";
 
 //removed stickyuser
 
+// pretty much everything under this is leanred from https://youtu.be/UeTHl9dmLb8?si=yvq_bvW2s6-iwL0c starting around 0:20
 if (isset($_POST['login'])) 
     {
         // Capture form data and use it for login logic

@@ -1,7 +1,9 @@
 <?php session_start(); 
-if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller') {
-    header("Location: index.php");
-}
+// Only allow sellers to access this page, buyers shouldnt be able to upload items for sale bc well they arent sellers so yeah
+if(!isset($_SESSION['role']) || $_SESSION['role'] != 'Seller') 
+    {
+        header("Location: index.php");
+    }
 ?>
 <!DOCTYPE html>
 <html>

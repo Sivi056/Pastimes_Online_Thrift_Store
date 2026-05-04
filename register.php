@@ -3,21 +3,27 @@ include 'DBConn.php';
 session_start();
 $msg = "";
 
-if (isset($_POST['register'])) {
-    $user = mysqli_real_escape_string($conn, $_POST['username']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $role = $_POST['role'];
+if (isset($_POST['register'])) 
+    {
+        $user = mysqli_real_escape_string($conn, $_POST['username']);
+        $email = mysqli_real_escape_string($conn, $_POST['email']);
+        // Hash the password before storing it in the database for security
+        // last year we got in trouble for using hashes lol
+        $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $role = $_POST['role'];
 
-    $sql = "INSERT INTO user (userName, userEmail, password, role, isVerified) 
-            VALUES ('$user', '$email', '$pass', '$role', 0)";
+        $sql = "INSERT INTO user (userName, userEmail, password, role, isVerified) 
+                VALUES ('$user', '$email', '$pass', '$role', 0)";
 
-    if (mysqli_query($conn, $sql)) {
-        $msg = "Registration successful! Wait for Admin verification.";
-    } else {
-        $msg = "Error: " . mysqli_error($conn);
+        if (mysqli_query($conn, $sql)) 
+            {
+                $msg = "Registration successful! Wait for Admin verification.";
+            } 
+            else 
+            {
+                $msg = "Error: " . mysqli_error($conn);
+            }
     }
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -35,6 +41,7 @@ if (isset($_POST['register'])) {
             <input type="email" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Create Password" required>
             <select name="role">
+                <!-- only 2 roles, either youre sellin or buyin, guess you have a separate seller and buyer acc if you do both?? -->
                 <option value="Buyer">Buyer</option>
                 <option value="Seller">Seller</option>
             </select>

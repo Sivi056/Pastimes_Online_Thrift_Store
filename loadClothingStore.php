@@ -4,15 +4,13 @@ include 'DBConn.php';
 
 echo "<h2>Pastimes Store: Database Initialization System</h2>";
 
-// Define the name of the SQL export (Requirement 8)
 $sqlFile = 'myClothingStore.sql';
 
 if (file_exists($sqlFile)) 
     {
-        // Read the contents of the exported SQL file
         $sqlQueries = file_get_contents($sqlFile);
 
-        // Disable Foreign Key checks so we can drop/rebuild tables without errors
+        // Turn off foreign key constraints so we can wipe everything cleanly
         mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
 
         // Execute all structural creation queries in the file at once
@@ -20,7 +18,6 @@ if (file_exists($sqlFile))
             {
                 do 
                 {
-                    // Loop through and clear results to ensure multi-query finishes cleanly
                     if ($result = mysqli_store_result($conn)) 
                         {
                             mysqli_free_result($result);
@@ -35,7 +32,6 @@ if (file_exists($sqlFile))
                 echo "<p style='color:red;'>ERROR: Could not execute SQL file. " . mysqli_error($conn) . "</p>";
             }
         
-        // Turn Foreign Key checks back on
         mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
     } 
     else 
@@ -43,13 +39,20 @@ if (file_exists($sqlFile))
         echo "<p style='color:orange;'>ERROR: The file <strong>$sqlFile</strong> was not found.</p>";
     }
 
-// CRITICAL FIX: Close the multi-query connection to prevent "Out of Sync" errors
+// Close multi-query connection to reset state
 mysqli_close($conn);
 
-// Re-open a clean connection for individual text file text insertions
+// Re-open a fresh connection for clean text-file insertions
 include 'DBConn.php';
 
 echo "<h3>Populating Data From Requirements Text Files...</h3>";
+
+// Clear out any messy residual records and reset auto-increment counters to 1
+mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
+mysqli_query($conn, "TRUNCATE TABLE user");
+mysqli_query($conn, "TRUNCATE TABLE category");
+mysqli_query($conn, "TRUNCATE TABLE product");
+mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
 
 // --- 1. POPULATE USERS FROM TEXT FILE ---
 if (file_exists('userData.txt.txt')) 
@@ -68,9 +71,10 @@ if (file_exists('userData.txt.txt'))
                         // Hash the passwords securely to match standard professional registration guidelines
                         $hashedPass = password_hash($plainPass, PASSWORD_DEFAULT);
                         
-                        // Admins are approved by default; Buyers/Sellers start as 0 (Unverified / Pending)
+                        // Admins are approved by default; Buyers/Sellers start as 0 (Pending Review)
                         $isVerified = ($role === 'Admin') ? 1 : 0;
 
+                        // MATCHES COUPLING: Columns must be exactly username, userEmail, password, role, is_verified
                         $stmt = $conn->prepare("INSERT INTO user (username, userEmail, password, role, is_verified) VALUES (?, ?, ?, ?, ?)");
                         $stmt->bind_param("ssssi", $name, $email, $hashedPass, $role, $isVerified);
                         $stmt->execute();
@@ -118,7 +122,6 @@ if (file_exists('productData.txt'))
                         $color = trim($data[8]);
                         $status = trim($data[9]);
 
-                        // Prepared statements handle special characters seamlessly (e.g. Levi's)
                         $stmt = $conn->prepare("INSERT INTO product (userId, categoryId, brand, price, conditionRating, description, size, material, color, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         $stmt->bind_param("iiddisssss", $userId, $categoryId, $brand, $price, $conditionRating, $description, $size, $material, $color, $status);
                         $stmt->execute();
@@ -128,7 +131,6 @@ if (file_exists('productData.txt'))
         echo "<p style='color:green; font-weight:bold;'>✓ Product text file items mapped successfully without key collisions.</p>";
     }
 
-// Close final operational connection safely
 mysqli_close($conn);
 echo "<p style='color:blue; font-weight:bold;'>System initialization complete. Platform is ready to use!</p>";
 ?>

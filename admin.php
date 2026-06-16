@@ -1,5 +1,5 @@
 <?php
-// FORCE ERROR REPORTING ON SO WE CAN SEE IF ANYTHING ELSE CLASHES
+// FORCE ERROR REPORTING ON SO WE CAN TRACE ANY UNEXPECTED BEHAVIOR
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -11,8 +11,8 @@ session_start();
 if (isset($_GET['verify'])) 
     {
         $id = intval($_GET['verify']);
-        // Maps directly to your enum 'Approved' status column
-        mysqli_query($conn, "UPDATE user SET status = 'Approved' WHERE userId = $id");
+        // Maps directly to your column: 'isVerified' with a capital V
+        mysqli_query($conn, "UPDATE user SET isVerified = 1 WHERE userId = $id");
         header("Location: admin.php"); 
         exit();
     }
@@ -27,8 +27,8 @@ if (isset($_GET['delete']))
     }
 
 // --- 3. FETCH ALL USERS ---
-// Pulls all records cleanly. If 'status' exists, it groups Pending users at the top.
-$users = mysqli_query($conn, "SELECT * FROM user ORDER BY (status = 'Pending') DESC, userId DESC");
+// Clean, standard fetch query using your exact column fields to prevent MySQL failures
+$users = mysqli_query($conn, "SELECT * FROM user");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,18 +116,14 @@ $users = mysqli_query($conn, "SELECT * FROM user ORDER BY (status = 'Pending') D
                 <?php while($row = mysqli_fetch_assoc($users)): ?>
                 <tr>
                     <td><?php echo $row['userId']; ?></td>
-
-                    <td><strong><?php echo htmlspecialchars($row['username'] ?? $row['userName'] ?? 'Unknown'); ?></strong>
-                    </td>
+                    <td><strong><?php echo htmlspecialchars($row['userName'] ?? 'Unknown'); ?></strong></td>
                     <td><?php echo htmlspecialchars($row['userEmail'] ?? 'No Email'); ?></td>
-
-                    <td><span class="role-badge"><?php echo $row['role'] ?? 'User'; ?></span></td>
+                    <td><span
+                            class="role-badge"><?php echo htmlspecialchars(!empty($row['role']) ? $row['role'] : 'Admin/User'); ?></span>
+                    </td>
 
                     <td>
-                        <?php 
-                            $currentStatus = $row['status'] ?? 'Pending';
-                            if($currentStatus === 'Approved'): 
-                            ?>
+                        <?php if(isset($row['isVerified']) && ($row['isVerified'] == 1 || $row['isVerified'] == '1')): ?>
                         <span class="status-active"><i class="fas fa-check-circle"></i> Approved Active</span>
                         <?php else: ?>
                         <span class="status-pending"><i class="fas fa-clock"></i> Pending Review</span>
@@ -135,7 +131,7 @@ $users = mysqli_query($conn, "SELECT * FROM user ORDER BY (status = 'Pending') D
                     </td>
 
                     <td>
-                        <?php if(($row['status'] ?? '') !== 'Approved'): ?>
+                        <?php if(!isset($row['isVerified']) || $row['isVerified'] == 0): ?>
                         <a href="admin.php?verify=<?php echo $row['userId']; ?>"
                             style="color: #2e7d32; font-weight: bold; text-decoration: none; margin-right: 15px; font-size: 0.9em;">
                             <i class="fas fa-user-check"></i> Approve
@@ -153,7 +149,7 @@ $users = mysqli_query($conn, "SELECT * FROM user ORDER BY (status = 'Pending') D
                     <td colspan="6" style="text-align: center; padding: 40px; color: #777;">
                         <i class="fas fa-folder-open"
                             style="font-size: 2.5em; color: #D4AF37; margin-bottom: 10px; display: block;"></i>
-                        No users found. Run loadClothingStore.php to populate the data files.
+                        No users currently found in your database. Run your initial loaders.
                     </td>
                 </tr>
                 <?php endif; ?>

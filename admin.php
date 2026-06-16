@@ -2,74 +2,28 @@
 include 'DBConn.php';
 session_start();
 
-echo "<div style='background: #fff3cd; color: #856404; padding: 15px; border: 1px solid #ffeeba; font-family: monospace; border-radius: 5px; margin: 20px auto; max-width: 900px;'>";
-echo "<h3>🔍 PASTIMES DATABASE DIAGNOSTIC UTILITY</h3>";
-
-// 1. Check if Connection exists
-if (!isset($conn)) {
-    die("❌ Error: The database connection variable '\$conn' is not initialized. Check your DBConn.php file.");
-} else {
-    echo "✅ Database connection variable detected.<br>";
-}
-
-// 2. Discover existing tables in your local database
-echo "<br><strong>📋 Available tables in your database:</strong><br>";
-$table_check = mysqli_query($conn, "SHOW TABLES");
-$found_user_table = "";
-
-if ($table_check) {
-    while ($t_row = mysqli_fetch_array($table_check)) {
-        $tableName = $t_row[0];
-        echo " • " . $tableName . "<br>";
-        if (strtolower($tableName) == 'users' || strtolower($tableName) == 'user' || strlike($tableName, 'user')) {
-            $found_user_table = $tableName;
-        }
-    }
-} else {
-    echo "❌ Could not list tables: " . mysqli_error($conn) . "<br>";
-}
-
-// 3. Fallback table router logic
-if (empty($found_user_table)) {
-    echo "<br>❌ <strong>CRITICAL ERROR:</strong> No table representing users/accounts was automatically detected. Please run your database setup script or create a 'users' table.<br>";
-    // Set a dummy query to prevent fatal script failure below
-    $result = false;
-} else {
-    echo "<br>🎯 Found table target: <strong>$found_user_table</strong><br>";
-    
-    // Check columns inside that table so we know the column names!
-    echo "<strong>🗂️ Table Columns inside '$found_user_table':</strong> ";
-    $col_check = mysqli_query($conn, "SHOW COLUMNS FROM $found_user_table");
-    $columns = [];
-    while($c_row = mysqli_fetch_assoc($col_check)) {
-        $columns[] = $c_row['Field'];
-    }
-    echo implode(', ', $columns) . "<br>";
-
-    // Run query on the table that actually exists
-    $result = mysqli_query($conn, "SELECT * FROM $found_user_table");
-}
-echo "</div>";
-
-// Helper function to loosely search strings
-function strlike($haystack, $needle) {
-    return strpos(strtolower($haystack), strtolower($needle)) !== false;
-}
-
-// Handle Account Approval Safely
-if (isset($_GET['approve']) && !empty($found_user_table)) {
+// Handle Account Approval
+if (isset($_GET['approve'])) {
     $id = intval($_GET['approve']);
-    $id_column = in_array('userId', $columns) ? 'userId' : 'id';
-    $status_column = in_array('status', $columns) ? 'status' : (in_array('isVerified', $columns) ? 'isVerified' : '');
     
-    if($status_column == 'status') {
-        mysqli_query($conn, "UPDATE $found_user_table SET status = 'Approved' WHERE $id_column = $id");
-    } elseif($status_column == 'isVerified') {
-        mysqli_query($conn, "UPDATE $found_user_table SET isVerified = 1 WHERE $id_column = $id");
-    }
+    // We update 'status' or 'isVerified' to 'Approved'/'1' based on your user table structure
+    mysqli_query($conn, "UPDATE user SET status = 'Approved' WHERE id = $id OR userId = $id");
+    mysqli_query($conn, "UPDATE user SET isVerified = 1 WHERE id = $id OR userId = $id");
+    
     header("Location: admin.php");
     exit();
 }
+
+// Handle Account Deletion
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    mysqli_query($conn, "DELETE FROM user WHERE id = $id OR userId = $id");
+    header("Location: admin.php");
+    exit();
+}
+
+// Fetch from your exact table: 'user'
+$result = mysqli_query($conn, "SELECT * FROM user");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -88,7 +42,7 @@ if (isset($_GET['approve']) && !empty($found_user_table)) {
         </div>
     </nav>
 
-    <div class="container" style="max-width: 1000px; margin-top: 20px;">
+    <div class="container" style="max-width: 1000px; margin-top: 40px;">
         <div style="text-align: left; margin-bottom: 20px;">
             <h2 style="font-size: 24px; color: #333;">👤 Pastimes Community Access Control</h2>
             <p style="color: #666; margin-top: 5px;">Review incoming account registrations and manage buyer/seller marketplace access.</p>
@@ -108,31 +62,42 @@ if (isset($_GET['approve']) && !empty($found_user_table)) {
                 <?php 
                 if ($result && mysqli_num_rows($result) > 0): 
                     while($row = mysqli_fetch_assoc($result)): 
-                        // Safe extraction helpers
-                        $primaryId = $row['id'] ?? $row['userId'] ?? 0;
-                        $emailAddr = $row['email'] ?? $row['Email'] ?? 'No Email';
-                        $accRole = $row['role'] ?? $row['AccountRole'] ?? 'Buyer';
                         
-                        $displayName = "Unknown";
-                        if(isset($row['username'])) $displayName = $row['username'];
-                        elseif(isset($row['name'])) $displayName = $row['name'];
-                        else $displayName = explode('@', $emailAddr)[0];
+                        // Extract values safely checking common variations
+                        $primaryId = $row['id'] ?? $row['userId'] ?? 'N/A';
+                        $emailAddr = $row['email'] ?? $row['Email'] ?? 'No Email';
+                        $role = $row['role'] ?? $row['AccountRole'] ?? 'Buyer';
+                        
+                        // Username fallback row logic
+                        $displayName = "Unknown User";
+                        if (isset($row['username'])) {
+                            $displayName = $row['username'];
+                        } elseif (isset($row['name'])) {
+                            $displayName = $row['name'];
+                        } else {
+                            $displayName = explode('@', $emailAddr)[0]; 
+                        }
 
+                        // Verification status check
                         $isVerified = false;
-                        if (isset($row['status']) && strtolower($row['status']) == 'approved') $isVerified = true;
-                        if (isset($row['isVerified']) && $row['isVerified'] == 1) $isVerified = true;
+                        if (isset($row['isVerified']) && ($row['isVerified'] == 1 || $row['isVerified'] === true)) {
+                            $isVerified = true;
+                        } elseif (isset($row['status']) && strtolower($row['status']) === 'approved') {
+                            $isVerified = true;
+                        }
                 ?>
                     <tr style="border-bottom: 1px solid #eee; color: #333;">
                         <td style="padding: 15px; font-weight: bold; color: #777;"><?php echo $primaryId; ?></td>
                         <td style="padding: 15px; font-weight: bold;"><?php echo htmlspecialchars($displayName); ?></td>
                         <td style="padding: 15px;"><?php echo htmlspecialchars($emailAddr); ?></td>
-                        <td style="padding: 15px;"><span style="background: #f4f4f4; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;"><?php echo htmlspecialchars($accRole); ?></span></td>
+                        <td style="padding: 15px;"><span style="background: #f4f4f4; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;"><?php echo htmlspecialchars($role); ?></span></td>
                         <td style="padding: 15px; text-align: center;">
                             <?php if (!$isVerified): ?>
-                                <a href="admin.php?approve=<?php echo $primaryId; ?>" style="background: #2e7d32; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; font-weight: bold;">Approve</a>
+                                <a href="admin.php?approve=<?php echo $primaryId; ?>" style="background: #2e7d32; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; margin-right: 5px; font-weight: bold;">Approve</a>
                             <?php else: ?>
-                                <span style="color: #2e7d32; font-weight: bold; font-size: 0.9em;">✓ Active</span>
+                                <span style="color: #2e7d32; font-weight: bold; margin-right: 10px; font-size: 0.9em;">✓ Active</span>
                             <?php endif; ?>
+                            <a href="admin.php?delete=<?php echo $primaryId; ?>" onclick="return confirm('Delete this user?');" style="background: #c62828; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; font-weight: bold;">Delete</a>
                         </td>
                     </tr>
                 <?php 
@@ -140,9 +105,7 @@ if (isset($_GET['approve']) && !empty($found_user_table)) {
                 else: 
                 ?>
                     <tr>
-                        <td colspan="5" style="padding: 40px; text-align: center; color: #777;">
-                            ⚠️ Diagnostic warning: No records could be fetched or queried safely.
-                        </td>
+                        <td colspan="5" style="padding: 30px; text-align: center; color: #777;">No user accounts registered yet.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

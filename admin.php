@@ -27,8 +27,16 @@ if (isset($_GET['delete']))
     }
 
 // --- 3. FETCH ALL USERS ---
-// Clean, standard fetch query using your exact column fields to prevent MySQL failures
+// Clean query targeting the exact table 'user' used in register.php
 $users = mysqli_query($conn, "SELECT * FROM user");
+
+// Safeguard against the Fatal error on line 53 if the database context fails
+if (!$users) {
+    die("<div style='padding: 20px; background: #ffebee; color: #c62828; font-family: sans-serif; border-radius: 4px; margin: 20px;'>
+            <strong>Database Query Failed:</strong> " . mysqli_error($conn) . " 
+            <br><small>Check if your local table is named 'user' and contains the columns 'userId', 'userName', 'userEmail', 'role', and 'isVerified'.</small>
+         </div>");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -140,10 +148,10 @@ $users = mysqli_query($conn, "SELECT * FROM user");
                 </tr>
             </thead>
             <tbody>
-                <?php if ($users && mysqli_num_rows($users) > 0): ?>
+                <?php if (mysqli_num_rows($users) > 0): ?>
                 <?php while($row = mysqli_fetch_assoc($users)): ?>
                 <tr>
-                    <td><?php echo $row['userId']; ?></td>
+                    <td><?php echo $row['userId'] ?? $row['userid'] ?? $row['id'] ?? '—'; ?></td>
 
                     <td>
                         <strong>
@@ -159,7 +167,8 @@ $users = mysqli_query($conn, "SELECT * FROM user");
                         </strong>
                     </td>
 
-                    <td><?php echo htmlspecialchars($row['userEmail'] ?? 'No Email Registered'); ?></td>
+                    <td><?php echo htmlspecialchars($row['userEmail'] ?? $row['email'] ?? 'No Email Registered'); ?>
+                    </td>
                     <td><span
                             class="role-badge"><?php echo htmlspecialchars(!empty($row['role']) ? $row['role'] : 'Unassigned'); ?></span>
                     </td>
@@ -174,13 +183,13 @@ $users = mysqli_query($conn, "SELECT * FROM user");
 
                     <td>
                         <?php if(!isset($row['isVerified']) || $row['isVerified'] == 0): ?>
-                        <a href="admin.php?verify=<?php echo $row['userId']; ?>" class="action-btn"
-                            style="color: #2e7d32; margin-right: 15px;">
+                        <a href="admin.php?verify=<?php echo $row['userId'] ?? $row['userid'] ?? $row['id']; ?>"
+                            class="action-btn" style="color: #2e7d32; margin-right: 15px;">
                             <i class="fas fa-user-check"></i> Approve
                         </a>
                         <?php endif; ?>
-                        <a href="admin.php?delete=<?php echo $row['userId']; ?>" class="action-btn"
-                            style="color: #c62828;">
+                        <a href="admin.php?delete=<?php echo $row['userId'] ?? $row['userid'] ?? $row['id']; ?>"
+                            class="action-btn" style="color: #c62828;">
                             <i class="fas fa-trash-alt"></i> Delete
                         </a>
                     </td>

@@ -1,219 +1,111 @@
 <?php
-// FORCE ERROR REPORTING ON SO WE CAN TRACE ANY UNEXPECTED BEHAVIOR
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 include 'DBConn.php';
 session_start();
 
-// --- 1. HANDLE APPROVAL ACTION ---
-if (isset($_GET['verify'])) 
-    {
-        $id = intval($_GET['verify']);
-        // Maps directly to your column: 'isVerified' with a capital V
-        mysqli_query($conn, "UPDATE user SET isVerified = 1 WHERE userId = $id");
-        header("Location: admin.php"); 
-        exit();
-    }
-
-// --- 2. HANDLE DELETION ACTION ---
-if (isset($_GET['delete'])) 
-    {
-        $id = intval($_GET['delete']);
-        mysqli_query($conn, "DELETE FROM user WHERE userId = $id");
-        header("Location: admin.php"); 
-        exit();
-    }
-
-// --- 3. FETCH ALL USERS ---
-// Clean query targeting the exact table 'user' used in register.php
-$users = mysqli_query($conn, "SELECT * FROM user");
-
-// Safeguard against the Fatal error on line 53 if the database context fails
-if (!$users) {
-    die("<div style='padding: 20px; background: #ffebee; color: #c62828; font-family: sans-serif; border-radius: 4px; margin: 20px;'>
-            <strong>Database Query Failed:</strong> " . mysqli_error($conn) . " 
-            <br><small>Check if your local table is named 'user' and contains the columns 'userId', 'userName', 'userEmail', 'role', and 'isVerified'.</small>
-         </div>");
+// Handle Account Approval
+if (isset($_GET['approve'])) {
+    $id = intval($_GET['approve']);
+    // We update both common verification naming variations to be completely safe
+    mysqli_query($conn, "UPDATE users SET isVerified = 1 WHERE id = $id");
+    mysqli_query($conn, "UPDATE users SET status = 'Approved' WHERE id = $id");
+    header("Location: admin.php");
+    exit();
 }
+
+// Handle Account Deletion
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    mysqli_query($conn, "DELETE FROM users WHERE id = $id");
+    header("Location: admin.php");
+    exit();
+}
+
+// Safely pull users from database
+$result = mysqli_query($conn, "SELECT * FROM users");
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Pastimes | Admin Oversight Panel</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f9f9f9;
-        margin: 0;
-        padding: 0;
-    }
-
-    .admin-container {
-        max-width: 1050px;
-        margin: 40px auto;
-        padding: 30px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .admin-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        margin-top: 20px;
-    }
-
-    .admin-table th {
-        background-color: #006400;
-        /* Matching your dark green theme header */
-        color: white;
-        padding: 14px;
-        text-align: left;
-        font-size: 0.95em;
-    }
-
-    .admin-table td {
-        padding: 14px;
-        border-bottom: 1px solid #eee;
-        color: #333;
-        font-size: 0.95em;
-    }
-
-    .role-badge {
-        background: #eef2f7;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 0.85em;
-        font-weight: 600;
-        color: #4a5568;
-    }
-
-    .status-active {
-        color: #2e7d32;
-        font-weight: bold;
-        background: #e8f5e9;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 0.85em;
-        display: inline-block;
-    }
-
-    .status-pending {
-        color: #c62828;
-        font-weight: bold;
-        background: #ffebee;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 0.85em;
-        display: inline-block;
-    }
-
-    .action-btn {
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 0.9em;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-    </style>
+    <title>Pastimes | Community Access Control</title>
 </head>
-
 <body>
-    <div class="admin-container">
-        <h1
-            style="border-bottom: 2px solid #D4AF37; padding-bottom: 15px; font-family: 'Helvetica Neue', sans-serif; margin-top: 0; color: #1a1a1a;">
-            <i class="fas fa-user-shield"></i> Pastimes Community Access Control
-        </h1>
-        <p style="color: #666; margin-bottom: 25px;">Review incoming account registrations and manage buyer/seller
-            marketplace access.</p>
+    <nav>
+        <div class="logo">PASTIMES</div>
+        <div>
+            <a href="index.php">Home</a>
+            <a href="discovery.php">Discovery</a>
+            <a href="logout.php">Logout</a>
+        </div>
+    </nav>
 
-        <table class="admin-table">
+    <div class="container" style="max-width: 1000px; margin-top: 40px;">
+        <div style="text-align: left; margin-bottom: 20px;">
+            <h2 style="font-size: 24px; color: #333;">👤 Pastimes Community Access Control</h2>
+            <p style="color: #666; margin-top: 5px;">Review incoming account registrations and manage buyer/seller marketplace access.</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
             <thead>
-                <tr>
-                    <th style="width: 8%;">ID</th>
-                    <th style="width: 25%;">Name</th>
-                    <th style="width: 25%;">Email</th>
-                    <th style="width: 15%;">Account Role</th>
-                    <th style="width: 12%;">Status</th>
-                    <th style="width: 15%;">Actions</th>
+                <tr style="background: var(--pastimes-green, #006400); color: white; text-align: left;">
+                    <th style="padding: 15px;">ID</th>
+                    <th style="padding: 15px;">Name / User</th>
+                    <th style="padding: 15px;">Email</th>
+                    <th style="padding: 15px;">Account Role</th>
+                    <th style="padding: 15px; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (mysqli_num_rows($users) > 0): ?>
-                <?php while($row = mysqli_fetch_assoc($users)): ?>
-                <tr>
-                    <td><?php echo $row['userId'] ?? $row['userid'] ?? $row['id'] ?? '—'; ?></td>
+                <?php 
+                if ($result && mysqli_num_rows($result) > 0): 
+                    while($row = mysqli_fetch_assoc($result)): 
+                        // FOOLPROOF USERNAME FALLBACK CHECK
+                        $displayName = "Unknown User";
+                        if (isset($row['username'])) {
+                            $displayName = $row['username'];
+                        } elseif (isset($row['name'])) {
+                            $displayName = $row['name'];
+                        } elseif (isset($row['Name'])) {
+                            $displayName = $row['Name'];
+                        } else {
+                            $displayName = explode('@', $row['email'])[0]; // Use email prefix if username key is missing
+                        }
 
-                    <td>
-                        <strong>
-                            <?php 
-                            if (!empty($row['userName'])) {
-                                echo htmlspecialchars($row['userName']);
-                            } elseif (!empty($row['username'])) {
-                                echo htmlspecialchars($row['username']);
-                            } else {
-                                echo 'Unknown Profile';
-                            }
-                            ?>
-                        </strong>
-                    </td>
-
-                    <td><?php echo htmlspecialchars($row['userEmail'] ?? $row['email'] ?? 'No Email Registered'); ?>
-                    </td>
-                    <td><span
-                            class="role-badge"><?php echo htmlspecialchars(!empty($row['role']) ? $row['role'] : 'Unassigned'); ?></span>
-                    </td>
-
-                    <td>
-                        <?php if(isset($row['isVerified']) && ($row['isVerified'] == 1 || $row['isVerified'] == '1')): ?>
-                        <span class="status-active"><i class="fas fa-check-circle"></i> Active</span>
-                        <?php else: ?>
-                        <span class="status-pending"><i class="fas fa-clock"></i> Pending Review</span>
-                        <?php endif; ?>
-                    </td>
-
-                    <td>
-                        <?php if(!isset($row['isVerified']) || $row['isVerified'] == 0): ?>
-                        <a href="admin.php?verify=<?php echo $row['userId'] ?? $row['userid'] ?? $row['id']; ?>"
-                            class="action-btn" style="color: #2e7d32; margin-right: 15px;">
-                            <i class="fas fa-user-check"></i> Approve
-                        </a>
-                        <?php endif; ?>
-                        <a href="admin.php?delete=<?php echo $row['userId'] ?? $row['userid'] ?? $row['id']; ?>"
-                            class="action-btn" style="color: #c62828;">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </a>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-                <?php else: ?>
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #777;">
-                        <i class="fas fa-folder-open"
-                            style="font-size: 2.5em; color: #D4AF37; margin-bottom: 10px; display: block;"></i>
-                        No users currently found in your database. Run your initialization scripts.
-                    </td>
-                </tr>
+                        // Determine current verification status safely
+                        $isVerified = false;
+                        if (isset($row['isVerified']) && ($row['isVerified'] == 1 || $row['isVerified'] === true)) {
+                            $isVerified = true;
+                        } elseif (isset($row['status']) && strtolower($row['status']) === 'approved') {
+                            $isVerified = true;
+                        }
+                        
+                        $role = $row['role'] ?? $row['AccountRole'] ?? 'Buyer';
+                ?>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 15px; font-weight: bold; color: #777;"><?php echo $row['id'] ?? $row['userId'] ?? 'N/A'; ?></td>
+                        <td style="padding: 15px; font-weight: bold; color: #333;"><?php echo htmlspecialchars($displayName); ?></td>
+                        <td style="padding: 15px; color: #555;"><?php echo htmlspecialchars($row['email'] ?? $row['Email'] ?? 'No Email'); ?></td>
+                        <td style="padding: 15px; color: #666;"><span style="background: #f4f4f4; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;"><?php echo htmlspecialchars($role); ?></span></td>
+                        <td style="padding: 15px; text-align: center;">
+                            <?php if (!$isVerified): ?>
+                                <a href="admin.php?approve=<?php echo $row['id'] ?? $row['userId']; ?>" style="background: #2e7d32; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; margin-right: 5px; font-weight: bold;">Approve</a>
+                            <?php else: ?>
+                                <span style="color: #2e7d32; font-weight: bold; margin-right: 10px; font-size: 0.9em;">✓ Active</span>
+                            <?php endif; ?>
+                            <a href="admin.php?delete=<?php echo $row['id'] ?? $row['userId']; ?>" onclick="return confirm('Delete this user?');" style="background: #c62828; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; font-weight: bold;">Delete</a>
+                        </td>
+                    </tr>
+                <?php 
+                    endwhile; 
+                else: 
+                ?>
+                    <tr>
+                        <td colspan="5" style="padding: 30px; text-align: center; color: #777;">No user accounts found in database.</td>
+                    </tr>
                 <?php endif; ?>
             </tbody>
         </table>
-
-        <div style="margin-top: 35px;">
-            <a href="index.php"
-                style="text-decoration: none; display: inline-block; padding: 12px 24px; font-weight: bold; background: #1a1a1a; color: white; border-radius: 4px;">
-                <i class="fas fa-arrow-left"></i> Exit Dashboard
-            </a>
-        </div>
     </div>
 </body>
-
 </html>

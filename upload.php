@@ -11,54 +11,52 @@
 include 'DBConn.php';
 session_start();
 
-// Redirect if not logged in as a Seller
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Seller') {
-    header("Location: login.php");
-    exit();
-}
+$theme = $_SESSION['theme'] ?? 'Light';
+$statusMessage = "";
 
-$msg = "";
-
-if (isset($_POST['upload_item'])) {
-    $itemName = mysqli_real_escape_string($conn, $_POST['item_name']);
-    $description = mysqli_real_escape_string($conn, $_POST['description']);
-    $brand = mysqli_real_escape_string($conn, $_POST['brand']);
+if (isset($_POST['submit_clothing'])) {
+    $itemName = mysqli_real_escape_with_str($conn, $_POST['item_name']);
+    $brand = mysqli_real_escape_with_str($conn, $_POST['brand']);
+    $description = mysqli_real_escape_with_str($conn, $_POST['description']);
     $price = floatval($_POST['price']);
     
-    // File upload logic
-    $targetDir = "images/";
-    // Ensure directory exists
-    if (!is_dir($targetDir)) {
-        mkdir($targetDir, 0755, true);
+    // File Upload Handling
+    $targetDir = "uploads/";
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
     }
     
-    $fileName = basename($_FILES["item_image"]["name"]);
-    $targetFilePath = $targetDir . time() . "_" . $fileName; // Unique name prefix
+    $fileName = basename($_FILES["clothing_image"]["name"]);
+    $targetFilePath = $targetDir . time() . "_" . $fileName; // Appends timestamp to prevent overwriting files
     $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
     
-    if (!empty($fileName)) {
-        // Allow specific file formats
-        $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
-        if (in_array(strtolower($fileType), $allowTypes)) {
-            if (move_uploaded_uploaded_file($_FILES["item_image"]["tmp_name"], $targetFilePath)) {
-                // Insert into clothing database table
-                $sql = "INSERT INTO clothing (itemName, description, brand, price, imagePath, isApproved) 
-                        VALUES ('$itemName', '$description', '$brand', $price, '$targetFilePath', 0)";
+    if(!empty($fileName)) {
+        // Permit common web image profiles
+        $allowTypes = array('jpg','png','jpeg','gif');
+        if(in_array(strtolower($fileType), $allowTypes)){
+            if(move_uploaded_file($_FILES["clothing_image"]["tmp_name"], $targetFilePath)){
+                // Insert clothes posting details into your clothing schema table layout
+                $sql = "INSERT INTO clothing (itemName, brand, description, price, imagePath, status) 
+                        VALUES ('$itemName', '$brand', '$description', $price, '$targetFilePath', 'Pending Approval')";
                 
-                if (mysqli_query($conn, $sql)) {
-                    $msg = "Item uploaded successfully! Awaiting admin distribution verification.";
+                if(mysqli_query($conn, $sql)){
+                    $statusMessage = "🎉 Sale request uploaded successfully! Awaiting Admin verification oversight.";
                 } else {
-                    $msg = "Database storage failure: " . mysqli_error($conn);
+                    $statusMessage = "❌ Database error: Couldn't complete registration record link.";
                 }
             } else {
-                $msg = "Error moving file to storage folder.";
+                $statusMessage = "❌ File Error: Failed to write uploaded image to target folder directory path.";
             }
         } else {
-            $msg = "Invalid file type. Only JPG, JPEG, PNG, & GIF allowed.";
+            $statusMessage = "❌ Invalid File Format: Only JPG, JPEG, PNG, or GIF extensions allowed.";
         }
     } else {
-        $msg = "Please select an image to upload.";
+        $statusMessage = "❌ Selection Error: Please select an item photo preview to upload.";
     }
+}
+
+function mysqli_real_escape_with_str($conn, $str) {
+    return mysqli_real_escape_string($conn, trim($str));
 }
 ?>
 <!DOCTYPE html>
@@ -66,36 +64,50 @@ if (isset($_POST['upload_item'])) {
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
-    <title>Pastimes | Upload Showcase</title>
+    <title>Submit Piece | Pastimes Marketplace</title>
 </head>
-<body>
+<body class="<?php echo $theme; ?>">
     <nav>
         <div class="logo">PASTIMES</div>
         <div>
             <a href="index.php">Home</a>
-            <a href="discovery.php">Discovery</a>
-            <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
+            <a href="discovery.php">Discovery Feed</a>
+            <a href="logout.php">Logout</a>
         </div>
     </nav>
 
-    <div class="container">
-        <h2>List an Authenticated Item</h2>
-        <p style="color: #666;">Provide clear shots and honest wear descriptions for community verification.</p>
-        
-        <?php if($msg) echo "<p style='color: green; font-weight: bold;'>$msg</p>"; ?>
+    <div class="container" style="max-width: 600px; margin-top: 30px;">
+        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); color: #333;">
+            <h2 style="margin-top: 0;">👕 List an Item for Sale</h2>
+            <p style="color: #666; font-size: 0.9em;">Submit your vintage piece or sneakers. Items are verified by administration within 24 hours.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-        <form method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
-            <input type="text" name="item_name" placeholder="Item Title (e.g., Vintage Nike Crewneck)" required>
-            <input type="text" name="brand" placeholder="Brand Label (e.g., Nike, Puma)" required>
-            <input type="number" step="0.01" name="price" placeholder="Price (ZAR)" required>
-            
-            <textarea name="description" placeholder="Describe the item condition, sizing details, and wear defects..." rows="5" style="width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 10px; box-sizing: border-box; margin-bottom: 15px;" required></textarea>
-            
-            <label style="display: block; text-align: left; margin-bottom: 5px; font-weight: bold; color: var(--pastimes-green);">Upload Piece Imagery:</label>
-            <input type="file" name="item_image" required style="border: none; background: none; padding-left: 0;">
+            <?php if(!empty($statusMessage)) echo "<p style='font-weight: bold; color: var(--pastimes-green); background: #e8f5e9; padding: 10px; border-radius: 4px;'>$statusMessage</p>"; ?>
 
-            <button type="submit" name="upload_item" class="btn-gold" style="margin-top: 15px; width: 100%;">Submit for Review</button>
-        </form>
+            <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Garment / Piece Title:</label>
+                    <input type="text" name="item_name" required placeholder="e.g. Vintage Nike Windbreaker" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Brand Name:</label>
+                    <input type="text" name="brand" required placeholder="e.g. Nike" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Asking Price (ZAR):</label>
+                    <input type="number" step="0.01" name="price" required placeholder="R 0.00" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Condition & Details Description:</label>
+                    <textarea name="description" rows="4" required placeholder="Describe condition flaws, sizing fit details, authenticity tracking tags..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: sans-serif;"></textarea>
+                </div>
+                <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Item Imagery Upload:</label>
+                    <input type="file" name="clothing_image" required style="padding: 5px 0;">
+                </div>
+                <button type="submit" name="submit_clothing" class="btn-gold" style="padding: 12px; font-size: 1em; font-weight: bold; margin-top: 10px;">Submit Verification Request</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

@@ -2,19 +2,15 @@
 include 'DBConn.php';
 session_start();
 
-// Handle Account Approval
+// Handle Account Approval Safely
 if (isset($_GET['approve'])) {
     $id = intval($_GET['approve']);
-    
-    // We update 'status' or 'isVerified' to 'Approved'/'1' based on your user table structure
     mysqli_query($conn, "UPDATE user SET status = 'Approved' WHERE id = $id OR userId = $id");
-    mysqli_query($conn, "UPDATE user SET isVerified = 1 WHERE id = $id OR userId = $id");
-    
     header("Location: admin.php");
     exit();
 }
 
-// Handle Account Deletion
+// Handle Account Deletion Safely
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     mysqli_query($conn, "DELETE FROM user WHERE id = $id OR userId = $id");
@@ -22,8 +18,16 @@ if (isset($_GET['delete'])) {
     exit();
 }
 
-// Fetch from your exact table: 'user'
+// RUN THE QUERY AND CATCH THE EXACT ERROR IF IT FAILS
 $result = mysqli_query($conn, "SELECT * FROM user");
+
+if (!$result) {
+    // This stops the fatal crash and prints the exact SQL breakdown on your screen
+    die("<div style='background: #f8d7da; color: #721c24; padding: 25px; margin: 40px auto; max-width: 800px; border: 1px solid #f5c6cb; font-family: monospace; border-radius: 6px;'>" .
+        "<h2>🛑 MySQL Query Failed!</h2>" .
+        "<strong>The database says:</strong> " . mysqli_error($conn) . 
+        "</div>");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,71 +47,31 @@ $result = mysqli_query($conn, "SELECT * FROM user");
     </nav>
 
     <div class="container" style="max-width: 1000px; margin-top: 40px;">
-        <div style="text-align: left; margin-bottom: 20px;">
-            <h2 style="font-size: 24px; color: #333;">👤 Pastimes Community Access Control</h2>
-            <p style="color: #666; margin-top: 5px;">Review incoming account registrations and manage buyer/seller marketplace access.</p>
-        </div>
+        <h2>👤 Pastimes Community Access Control</h2>
+        <p style="color: #666;">Review incoming account registrations and manage buyer/seller marketplace access.</p>
 
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
             <thead>
                 <tr style="background: var(--pastimes-green, #006400); color: white; text-align: left;">
                     <th style="padding: 15px;">ID</th>
-                    <th style="padding: 15px;">Name / User</th>
+                    <th style="padding: 15px;">Name</th>
                     <th style="padding: 15px;">Email</th>
                     <th style="padding: 15px;">Account Role</th>
                     <th style="padding: 15px; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php 
-                if ($result && mysqli_num_rows($result) > 0): 
-                    while($row = mysqli_fetch_assoc($result)): 
-                        
-                        // Extract values safely checking common variations
-                        $primaryId = $row['id'] ?? $row['userId'] ?? 'N/A';
-                        $emailAddr = $row['email'] ?? $row['Email'] ?? 'No Email';
-                        $role = $row['role'] ?? $row['AccountRole'] ?? 'Buyer';
-                        
-                        // Username fallback row logic
-                        $displayName = "Unknown User";
-                        if (isset($row['username'])) {
-                            $displayName = $row['username'];
-                        } elseif (isset($row['name'])) {
-                            $displayName = $row['name'];
-                        } else {
-                            $displayName = explode('@', $emailAddr)[0]; 
-                        }
-
-                        // Verification status check
-                        $isVerified = false;
-                        if (isset($row['isVerified']) && ($row['isVerified'] == 1 || $row['isVerified'] === true)) {
-                            $isVerified = true;
-                        } elseif (isset($row['status']) && strtolower($row['status']) === 'approved') {
-                            $isVerified = true;
-                        }
-                ?>
+                <?php while($row = mysqli_fetch_assoc($result)): ?>
                     <tr style="border-bottom: 1px solid #eee; color: #333;">
-                        <td style="padding: 15px; font-weight: bold; color: #777;"><?php echo $primaryId; ?></td>
-                        <td style="padding: 15px; font-weight: bold;"><?php echo htmlspecialchars($displayName); ?></td>
-                        <td style="padding: 15px;"><?php echo htmlspecialchars($emailAddr); ?></td>
-                        <td style="padding: 15px;"><span style="background: #f4f4f4; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;"><?php echo htmlspecialchars($role); ?></span></td>
+                        <td style="padding: 15px;"><?php echo $row['id'] ?? $row['userId'] ?? 'N/A'; ?></td>
+                        <td style="padding: 15px; font-weight: bold;"><?php echo htmlspecialchars($row['username'] ?? $row['name'] ?? 'User'); ?></td>
+                        <td style="padding: 15px;"><?php echo htmlspecialchars($row['email'] ?? 'No Email'); ?></td>
+                        <td style="padding: 15px;"><?php echo htmlspecialchars($row['role'] ?? 'Buyer'); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            <?php if (!$isVerified): ?>
-                                <a href="admin.php?approve=<?php echo $primaryId; ?>" style="background: #2e7d32; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; margin-right: 5px; font-weight: bold;">Approve</a>
-                            <?php else: ?>
-                                <span style="color: #2e7d32; font-weight: bold; margin-right: 10px; font-size: 0.9em;">✓ Active</span>
-                            <?php endif; ?>
-                            <a href="admin.php?delete=<?php echo $primaryId; ?>" onclick="return confirm('Delete this user?');" style="background: #c62828; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em; font-weight: bold;">Delete</a>
+                            <span style="color: #2e7d32; font-weight: bold;">Active</span>
                         </td>
                     </tr>
-                <?php 
-                    endwhile; 
-                else: 
-                ?>
-                    <tr>
-                        <td colspan="5" style="padding: 30px; text-align: center; color: #777;">No user accounts registered yet.</td>
-                    </tr>
-                <?php endif; ?>
+                <?php endwhile; ?>
             </tbody>
         </table>
     </div>

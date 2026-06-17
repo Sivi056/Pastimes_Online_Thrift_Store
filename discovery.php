@@ -87,7 +87,7 @@ $result = mysqli_query($conn, "SELECT * FROM product WHERE status = 'Available'"
 
                     <div style="margin-top: 10px;">
                         <small
-                            style="color: #999; text-transform: uppercase; font-weight: bold;"><?php echo htmlspecialchars($row['brand']); ?></small>
+                            style="color: #999; text-transform: uppercase; font-weight: bold;"><?php echo htmlspecialchars($row['brand'] ?? 'Pre-Loved'); ?></small>
                         <h3 style="margin: 5px 0 10px 0; font-size: 1.2em;">
                             <?php echo htmlspecialchars($row['itemName']); ?></h3>
                         <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
@@ -100,7 +100,7 @@ $result = mysqli_query($conn, "SELECT * FROM product WHERE status = 'Available'"
 
                 <div>
                     <form method="POST">
-                        <input type="hidden" name="clothing_id" value="<?php echo $row['clothingId']; ?>">
+                        <input type="hidden" name="clothing_id" value="<?php echo $row['productId']; ?>">
                         <button type="submit" name="add_to_cart" class="btn-gold" style="width: 100%;">Add to
                             Cart</button>
                     </form>
@@ -114,6 +114,7 @@ $result = mysqli_query($conn, "SELECT * FROM product WHERE status = 'Available'"
             </div>
             <?php endwhile; ?>
             <?php else: ?>
+
             <div
                 style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; color: #333; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
@@ -128,7 +129,11 @@ $result = mysqli_query($conn, "SELECT * FROM product WHERE status = 'Available'"
                     <p style="font-weight: bold; color: var(--pastimes-green, #006400);">R 1,200.00</p>
                 </div>
                 <div>
-                    <button class="btn-gold" style="width: 100%;">Add to Cart</button>
+                    <form method="POST">
+                        <input type="hidden" name="clothing_id" value="101">
+                        <button type="submit" name="add_to_cart" class="btn-gold" style="width: 100%;">Add to
+                            Cart</button>
+                    </form>
                     <a href="messages.php?chat_with=1"
                         style="border: 1px solid #006400; color: #006400; background: transparent; padding: 8px; border-radius: 4px; text-decoration: none; text-align: center; font-weight: bold; font-size: 0.85em; display: block; margin-top: 10px;">💬
                         Contact Seller</a>
@@ -140,12 +145,16 @@ $result = mysqli_query($conn, "SELECT * FROM product WHERE status = 'Available'"
                 <div>
                     <img src="Images/image_4.png.jpeg" alt="Levi Jeans"
                         style="width: 100%; height: 230px; object-fit: cover; border-radius: 5px;">
-                    <h3>Vintage Levi's</h3>
-                    <p style="color: #666; font-size: 0.9em;">Condition: 4/5 Straight Leg Fit</p>
+                    <h3>Vintage Levi's Denim Jacket</h3>
+                    <p style="color: #666; font-size: 0.9em;">Condition: 4/5 baggy Fit </p>
                     <p style="font-weight: bold; color: var(--pastimes-green, #006400);">R 450.00</p>
                 </div>
                 <div>
-                    <button class="btn-gold" style="width: 100%;">Add to Cart</button>
+                    <form method="POST">
+                        <input type="hidden" name="clothing_id" value="102">
+                        <button type="submit" name="add_to_cart" class="btn-gold" style="width: 100%;">Add to
+                            Cart</button>
+                    </form>
                     <a href="messages.php?chat_with=1"
                         style="border: 1px solid #006400; color: #006400; background: transparent; padding: 8px; border-radius: 4px; text-decoration: none; text-align: center; font-weight: bold; font-size: 0.85em; display: block; margin-top: 10px;">💬
                         Contact Seller</a>

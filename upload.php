@@ -7,8 +7,6 @@
 <!-- https://www.w3schools.com/php/php_sessions.asp -->
 //https://www.w3schools.com/php/func_var_isset.asp
 
-//https://www.w3schools.com/php/func_var_isset.asp
-
 <?php
 include 'DBConn.php';
 session_start();

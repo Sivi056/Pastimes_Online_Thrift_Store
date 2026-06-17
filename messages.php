@@ -12,7 +12,7 @@ if (!isset($_SESSION['username'])) {
 $current_user_id = $_SESSION['userId'];
 $active_chat_user = null;
 
-// 1. Send Message Logic
+// Send Message Logic
 if (isset($_POST['send_message'])) {
     $receiver_id = intval($_POST['receiver_id']);
     $message_text = mysqli_real_escape_string($conn, trim($_POST['message_text']));
@@ -34,11 +34,13 @@ if (isset($_GET['chat_with'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
     <title>Pastimes Messages | Chat with Sellers</title>
 </head>
+
 <body>
     <nav>
         <div class="logo">PASTIMES</div>
@@ -51,12 +53,14 @@ if (isset($_GET['chat_with'])) {
     </nav>
 
     <div class="container" style="max-width: 1000px; margin-top: 40px; display: flex; gap: 20px;">
-        
-        <div style="width: 35%; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; color: #333;">
+
+        <div
+            style="width: 35%; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; color: #333;">
             <h3 style="margin-top: 0; color: #006400;">💬 Pastimes Inbox</h3>
-            <p style="font-size: 0.85em; color: #777; margin-bottom: 20px;">Negotiate or ask questions about pre-loved pieces.</p>
+            <p style="font-size: 0.85em; color: #777; margin-bottom: 20px;">Negotiate or ask questions about pre-loved
+                pieces.</p>
             <hr style="border: 0; border-top: 1px solid #eee;">
-            
+
             <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
                 <?php
                 // Fetch unique users the current user has sent messages to or received messages from
@@ -87,19 +91,23 @@ if (isset($_GET['chat_with'])) {
             </div>
         </div>
 
-        <div style="width: 65%; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; min-height: 500px; color: #333;">
+        <div
+            style="width: 65%; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; min-height: 500px; color: #333;">
             <?php if ($active_chat_user): 
                 // Fetch the name of the active target user
                 $partner_meta = mysqli_query($conn, "SELECT username FROM user WHERE id = $active_chat_user OR userId = $active_chat_user");
                 $partner_meta_data = mysqli_fetch_assoc($partner_meta);
                 $active_chat_name = $partner_meta_data['username'] ?? 'User';
             ?>
-                <div style="background: #006400; color: white; padding: 15px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                    <h3 style="margin: 0; font-size: 1.1em;">Conversation with <?php echo htmlspecialchars($active_chat_name); ?></h3>
-                </div>
+            <div
+                style="background: #006400; color: white; padding: 15px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                <h3 style="margin: 0; font-size: 1.1em;">Conversation with
+                    <?php echo htmlspecialchars($active_chat_name); ?></h3>
+            </div>
 
-                <div style="flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #fafafa;">
-                    <?php
+            <div
+                style="flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #fafafa;">
+                <?php
                     // Fetch message history between current user and selected user
                     $chat_history_query = "SELECT * FROM message 
                                            WHERE (senderId = $current_user_id AND receiverId = $active_chat_user) 
@@ -111,27 +119,35 @@ if (isset($_GET['chat_with'])) {
                         $is_me = ($msg['senderId'] == $current_user_id);
                         $msg_align = $is_me ? "align-self: flex-end; background: #006400; color: white;" : "align-self: flex-start; background: #e0e0e0; color: #333;";
                     ?>
-                        <div style="max-width: 70%; padding: 10px 15px; border-radius: 12px; font-size: 0.95em; <?php echo $msg_align; ?>">
-                            <?php echo htmlspecialchars($msg['messageText']); ?>
-                        </div>
-                    <?php endwhile; ?>
+                <div
+                    style="max-width: 70%; padding: 10px 15px; border-radius: 12px; font-size: 0.95em; <?php echo $msg_align; ?>">
+                    <?php echo htmlspecialchars($msg['messageText']); ?>
                 </div>
+                <?php endwhile; ?>
+            </div>
 
-                <form method="POST" style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-                    <input type="hidden" name="receiver_id" value="<?php echo $active_chat_user; ?>">
-                    <input type="text" name="message_text" required placeholder="Type your message about the garment listing..." style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; outline: none;">
-                    <button type="submit" name="send_message" class="btn-gold" style="padding: 0 20px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer;">Send</button>
-                </form>
+            <form method="POST"
+                style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                <input type="hidden" name="receiver_id" value="<?php echo $active_chat_user; ?>">
+                <input type="text" name="message_text" required
+                    placeholder="Type your message about the garment listing..."
+                    style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; outline: none;">
+                <button type="submit" name="send_message" class="btn-gold"
+                    style="padding: 0 20px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer;">Send</button>
+            </form>
 
             <?php else: ?>
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1; color: #999; padding: 40px; text-align: center;">
-                    <span style="font-size: 3em; margin-bottom: 10px;">💬</span>
-                    <h3>No Active Chat Window Open</h3>
-                    <p style="font-size: 0.9em; max-width: 350px;">Select a user profile thread from the inbox panel on the left to review messages and authenticate offers.</p>
-                </div>
+            <div
+                style="display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1; color: #999; padding: 40px; text-align: center;">
+                <span style="font-size: 3em; margin-bottom: 10px;">💬</span>
+                <h3>No Active Chat Window Open</h3>
+                <p style="font-size: 0.9em; max-width: 350px;">Select a user profile thread from the inbox panel on the
+                    left to review messages and authenticate offers.</p>
+            </div>
             <?php endif; ?>
         </div>
 
     </div>
 </body>
+
 </html>

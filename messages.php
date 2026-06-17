@@ -7,9 +7,10 @@ if (!isset($_SESSION['username'])) {
     // For local sandbox preview testing, you can temporarily hardcode a session user if login isn't active:
     $_SESSION['userId'] = 1; 
     $_SESSION['username'] = 'Tina Turner';
+    $_SESSION['role'] = 'Buyer'; // Added to prevent index.php role warning during local testing
 }
 
-$current_user_id = $_SESSION['userId'];
+$current_user_id = intval($_SESSION['userId']);
 $active_chat_user = null;
 
 // Send Message Logic
@@ -27,7 +28,7 @@ if (isset($_POST['send_message'])) {
     }
 }
 
-// 2. Determine who the user is chatting with
+// Determine who the user is chatting with
 if (isset($_GET['chat_with'])) {
     $active_chat_user = intval($_GET['chat_with']);
 }
@@ -70,12 +71,15 @@ if (isset($_GET['chat_with'])) {
                 
                 if ($inbox_result && mysqli_num_rows($inbox_result) > 0) {
                     while ($inbox_row = mysqli_fetch_assoc($inbox_result)) {
-                        $partner_id = $inbox_row['chat_partner_id'];
+                        $partner_id = intval($inbox_row['chat_partner_id']);
                         
-                        // Query user details from your exact 'user' table matching the partner id
-                        $user_query = mysqli_query($conn, "SELECT username, role FROM user WHERE id = $partner_id OR userId = $partner_id");
-                        if ($user_row = mysqli_fetch_assoc($user_query)) {
-                            $partner_name = $user_row['username'] ?? 'Marketplace User';
+                        // FIX: Changed selection fields to match your precise db layout: userName, role, userId
+                        $user_query_str = "SELECT userName, role FROM user WHERE userId = $partner_id";
+                        $user_query = mysqli_query($conn, $user_query_str);
+                        
+                        // FIX: Confirm query didn't fail before executing fetch
+                        if ($user_query && $user_row = mysqli_fetch_assoc($user_query)) {
+                            $partner_name = $user_row['userName'] ?? 'Marketplace User';
                             $partner_role = $user_row['role'] ?? 'Seller';
                             $is_active = ($active_chat_user == $partner_id) ? "background: #e8f5e9; border-left: 4px solid #006400;" : "background: #f9f9f9;";
                             
@@ -94,10 +98,13 @@ if (isset($_GET['chat_with'])) {
         <div
             style="width: 65%; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; min-height: 500px; color: #333;">
             <?php if ($active_chat_user): 
-                // Fetch the name of the active target user
-                $partner_meta = mysqli_query($conn, "SELECT username FROM user WHERE id = $active_chat_user OR userId = $active_chat_user");
-                $partner_meta_data = mysqli_fetch_assoc($partner_meta);
-                $active_chat_name = $partner_meta_data['username'] ?? 'User';
+                // FIX: Altered selection target to check userName and userId columns precisely
+                $partner_meta = mysqli_query($conn, "SELECT userName FROM user WHERE userId = $active_chat_user");
+                $active_chat_name = 'User';
+                
+                if ($partner_meta && $partner_meta_data = mysqli_fetch_assoc($partner_meta)) {
+                    $active_chat_name = $partner_meta_data['userName'] ?? 'User';
+                }
             ?>
             <div
                 style="background: #006400; color: white; padding: 15px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
@@ -115,15 +122,19 @@ if (isset($_GET['chat_with'])) {
                                            ORDER BY timestamp ASC";
                     $chat_history_result = mysqli_query($conn, $chat_history_query);
                     
-                    while ($msg = mysqli_fetch_assoc($chat_history_result)):
-                        $is_me = ($msg['senderId'] == $current_user_id);
-                        $msg_align = $is_me ? "align-self: flex-end; background: #006400; color: white;" : "align-self: flex-start; background: #e0e0e0; color: #333;";
-                    ?>
+                    if ($chat_history_result) {
+                        while ($msg = mysqli_fetch_assoc($chat_history_result)):
+                            $is_me = ($msg['senderId'] == $current_user_id);
+                            $msg_align = $is_me ? "align-self: flex-end; background: #006400; color: white;" : "align-self: flex-start; background: #e0e0e0; color: #333;";
+                        ?>
                 <div
                     style="max-width: 70%; padding: 10px 15px; border-radius: 12px; font-size: 0.95em; <?php echo $msg_align; ?>">
                     <?php echo htmlspecialchars($msg['messageText']); ?>
                 </div>
-                <?php endwhile; ?>
+                <?php 
+                        endwhile; 
+                    }
+                ?>
             </div>
 
             <form method="POST"
@@ -133,7 +144,7 @@ if (isset($_GET['chat_with'])) {
                     placeholder="Type your message about the garment listing..."
                     style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; outline: none;">
                 <button type="submit" name="send_message" class="btn-gold"
-                    style="padding: 0 20px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer;">Send</button>
+                    style="padding: 0 20px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; background-color: #d4af37; color: white;">Send</button>
             </form>
 
             <?php else: ?>

@@ -1,10 +1,3 @@
-<!-- watched during development:
- https://youtube.com/playlist?list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&si=yJE-go8ZPSrvP-pI
- https://youtube.com/playlist?list=PLOR5hj0X3WPdOWwU7eCCfFcgIkS1WrDYl&si=_uDfh-nC1HIBcn4u
- https://youtube.com/playlist?list=PL5kIDoSdjG7PY_kPyULbbLk4mpvStqdPR&si=Vxt44Xpmhx7jnkji
- -->
-
- <!-- https://www.w3schools.com/php/php_sessions.asp -->
 <?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,16 +9,13 @@
 </head>
 
 <body>
-<!-- Navbar specifically from https://www.youtube.com/watch?v=0QY2VI1JbN8&list=PLm8sgxwSZofc_jFRsbTHPAW0Kp52KgAAm&index=3 around 0:50 in -->
     <nav>
         <div class="logo">PASTIMES</div>
         <div>
             <a href="index.php">Home</a>
             <a href="discovery.php">Discovery</a>
-            <!-- https://www.w3schools.com/php/func_var_isset.asp -->
             <?php if(isset($_SESSION['username'])): ?>
-            <!-- Show logout link with username if logged in -->
-            <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
+            <a href="logout.php">Logout (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a>
             <?php else: ?>
             <a href="login.php">Login</a>
             <?php endif; ?>
@@ -33,7 +23,6 @@
     </nav>
 
     <div class="container" style="text-align: center;">
-        <!-- https://www.w3schools.com/php/func_var_isset.asp -->
         <?php if(!isset($_SESSION['username'])): ?>
         <h1>Welcome to Pastimes</h1>
         <p>Your destination for pre-loved branded clothing.</p>
@@ -48,20 +37,23 @@
         <p style="margin-top: 15px; font-size: 0.9em;">Don't have an account? <a href="register.php"
                 style="color: var(--pastimes-green);">Register here</a></p>
         <?php else: ?>
-            <!-- If the user is logged in, show a short welcome message and options based on their role -->
-        <h1>Hello, <?php echo $_SESSION['username']; ?>!</h1>
-        <p>Role: <strong><?php echo $_SESSION['role']; ?></strong></p>
+        <h1>Hello, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
 
-        <!-- If the user is a seller, show them the seller dashboard link -->
-        <?php if($_SESSION['role'] == 'Seller'): ?>
-        <div style="background: #e8f5e9; padding: 20px; border-left: 5px solid var(--pastimes-green);">
+        <?php 
+        // FIX: Provide a default role value if it isn't defined in the session yet
+        $user_role = $_SESSION['role'] ?? 'Buyer'; 
+        ?>
+        <p>Role: <strong><?php echo htmlspecialchars($user_role); ?></strong></p>
+
+        <?php if($user_role == 'Seller'): ?>
+        <div
+            style="background: #e8f5e9; padding: 20px; border-left: 5px solid var(--pastimes-green); text-align: left;">
             <h3>Seller Dashboard</h3>
             <p>Verify your items and manage your inventory.</p>
             <a href="upload.php" class="btn-gold">Upload New Clothes</a>
         </div>
         <?php else: ?>
-        <!-- If the user isnt a seller, they must be a buyer, so show them the discovery feed link -->
-        <div style="background: #fff8e1; padding: 20px; border-left: 5px solid var(--pastimes-gold);">
+        <div style="background: #fff8e1; padding: 20px; border-left: 5px solid var(--pastimes-gold); text-align: left;">
             <h3>Ready to Shop?</h3>
             <p>Browse authenticated branded items from verified sellers.</p>
             <a href="discovery.php" class="btn-gold">Go to Discovery Feed</a>

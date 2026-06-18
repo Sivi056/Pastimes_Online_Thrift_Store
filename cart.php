@@ -67,9 +67,10 @@ $theme = $_SESSION['theme'] ?? 'Light';
         $total = 0;
         if (!empty($_SESSION['cart'])): 
             foreach ($_SESSION['cart'] as $id => $quantity):
-                // FIXED: Changed table to product and key to productId to align with your active schema layout
+                $id = intval($id);
+                // Execute a clean query connecting the dynamic session IDs straight to your product data keys
                 $query = mysqli_query($conn, "SELECT * FROM product WHERE productId = $id");
-                if ($row = mysqli_fetch_assoc($query)):
+                if ($query && $row = mysqli_fetch_assoc($query)):
                     $subtotal = $row['price'] * $quantity;
                     $total += $subtotal;
         ?>
@@ -127,7 +128,6 @@ $theme = $_SESSION['theme'] ?? 'Light';
 
             <?php 
             if ($userId):
-                // Fetch previous purchases by connecting user profile directly to historical products row states
                 $historySQL = "SELECT ph.*, p.itemName, p.brand, p.imagePath 
                                FROM purchase_history ph
                                JOIN product p ON ph.productId = p.productId 
@@ -135,7 +135,6 @@ $theme = $_SESSION['theme'] ?? 'Light';
                                ORDER BY ph.purchaseDate DESC";
                 $historyResult = mysqli_query($conn, $historySQL);
 
-                // Check if the table profile setup exists in phpMyAdmin yet
                 if ($historyResult && mysqli_num_rows($historyResult) > 0):
             ?>
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95em;">

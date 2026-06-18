@@ -212,10 +212,56 @@ if (isset($_GET['edit_product'])) {
         <?php if ($currentTab == 'users'): ?>
         <table
             style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <thead style="background: #f4f4f4;">
+                <tr>
+                    <th style="padding: 12px; text-align: left;">Name</th>
+                    <th style="padding: 12px; text-align: left;">Email</th>
+                    <th style="padding: 12px; text-align: left;">Role</th>
+                    <th style="padding: 12px; text-align: left;">Status</th>
+                    <th style="padding: 12px; text-align: left;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($userResult)): ?>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px;"><?php echo htmlspecialchars($row['userName']); ?></td>
+                    <td style="padding: 12px;"><?php echo htmlspecialchars($row['userEmail']); ?></td>
+                    <td style="padding: 12px;"><?php echo htmlspecialchars($row['role']); ?></td>
+                    <td style="padding: 12px;">
+                        <?php echo $row['isVerified'] ? '<span style="color:green;">Verified</span>' : '<span style="color:red;">Pending</span>'; ?>
+                    </td>
+                    <td style="padding: 12px;">
+                        <a href="admin.php?approve_user=<?php echo $row['userId']; ?>">Approve</a> |
+                        <a href="admin.php?edit_user=<?php echo $row['userId']; ?>">Edit</a> |
+                        <a href="admin.php?delete_user=<?php echo $row['userId']; ?>"
+                            onclick="return confirm('Are you sure?')">Delete</a>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
         </table>
         <?php else: ?>
         <table
             style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <thead style="background: #f4f4f4;">
+                <tr>
+                    <th style="padding: 12px;">Item</th>
+                    <th style="padding: 12px;">Status</th>
+                    <th style="padding: 12px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($productResult)): ?>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px;"><?php echo htmlspecialchars($row['itemName']); ?></td>
+                    <td style="padding: 12px;"><?php echo htmlspecialchars($row['status']); ?></td>
+                    <td style="padding: 12px;">
+                        <a href="admin.php?approve_product=<?php echo $row['productId']; ?>">Approve</a> |
+                        <a href="admin.php?edit_product=<?php echo $row['productId']; ?>">Edit</a>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
         </table>
         <?php endif; ?>
     </div>

@@ -74,7 +74,8 @@ $result = mysqli_query($conn, "SELECT * FROM product WHERE status = 'Available'"
                 style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; justify-content: space-between; color: #333;">
 
                 <div>
-                    <?php if (isset($row['price']) && $row['price'] >= 500): ?>
+
+                    <?php if ((isset($row['price']) && $row['price'] >= 500) || (isset($row['isVerified']) && $row['isVerified'] == 1)): ?>
                     <span
                         style="background: #d4af37; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; display: inline-block; margin-bottom: 10px;">
                         ✨ VERIFIED AUTHENTICITY

@@ -4,9 +4,6 @@
  https://youtube.com/playlist?list=PL5kIDoSdjG7PY_kPyULbbLk4mpvStqdPR&si=Vxt44Xpmhx7jnkji
  -->
 
-<!-- https://www.w3schools.com/php/php_sessions.asp -->
-//https://www.w3schools.com/php/func_var_isset.asp
-
 <?php
 include 'DBConn.php';
 session_start();
@@ -39,7 +36,7 @@ if (isset($_POST['submit_clothing'])) {
                 // Fetch the logged-in user's account ID dynamically
                 $userId = $_SESSION['userId'] ?? 1; 
                 
-                // Insert clothes posting details into your uniform product schema table layout
+                // INTEGRATED FIXED SCHEMA: Pushes explicit 'Pending Approval' default flag to your column structure
                 $sql = "INSERT INTO product (itemName, brand, description, price, imagePath, userId, status) 
                         VALUES ('$itemName', '$brand', '$description', $price, '$targetFilePath', $userId, 'Pending Approval')";
                 
